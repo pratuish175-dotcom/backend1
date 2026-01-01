@@ -34,7 +34,7 @@ app.use(express.json());
 
 // Allowed frontend origins
   const allowedOrigins = [
-  "https://frontend1-k4r9tdd6a-pjha9256s-projects.vercel.app",
+  "https://frontend1-fawn-seven.vercel.app",
 ,
   "http://localhost:3000"
 ];
