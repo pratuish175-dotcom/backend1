@@ -36,7 +36,8 @@ app.use(express.json());
   const allowedOrigins = [
   "https://frontend1-fawn-seven.vercel.app",
 ,
-  "http://localhost:3000"
+ "http://localhost:3000",
+  "http://localhost:3001"
 ];
 
 
