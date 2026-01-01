@@ -33,10 +33,11 @@ if (!fs.existsSync(uploadDir)) {
 app.use(express.json());
 
 // Allowed frontend origins
-const allowedOrigins = [
-  "https://frontend1-k4r9tdd6a-pjha9256s-projects.vercel.app", // Vercel URL
-  "http://localhost:3000",
+  const allowedOrigins = [
+  "https://frontend1-maqwtl9iq-pjha9256s-projects.vercel.app",
+  "http://localhost:3000"
 ];
+ 
 
 // CORS Configuration
 app.use(
