@@ -22,36 +22,44 @@ const app = express();
 const fs = require("fs");
 const path = require("path");
 
-// Uploads folder creation
+// Create uploads folder if missing
 const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
-  console.log("⭐ 'uploads' folder created!");
+  console.log("📂 uploads folder created");
 }
 
-// CORS FIXED
-const allowedOrigins = [
-  "http://localhost:3001",
-  "https://frontend1-maqwtl9iq-pjha9256s-projects.vercel.app"
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log("❌ Blocked CORS:", origin);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-}));
-
+// Parse JSON request bodies
 app.use(express.json());
 
+// Allowed frontend origins
+const allowedOrigins = [
+  "https://frontend1-k4r9tdd6a-pjha9256s-projects.vercel.app", // Vercel URL
+  "http://localhost:3000",
+];
+
+// CORS Configuration
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin.trim())) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    methods: "GET,POST,PUT,DELETE,PATCH",
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
+// Preflight handling
+app.options("*", cors());
+
+// Static uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Register Routes
+// API Routes
 app.use("/api/user", userRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
@@ -65,12 +73,12 @@ app.use("/api/mylist", myListRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/productColor", productColorRoutes);
 
-// DB Connection
+// MongoDB Connection
 mongoose
   .connect(process.env.CONNECTION_STRING)
-  .then(() => console.log("🟢 DB Connected"))
-  .catch((err) => console.error("🔴 DB Error:", err));
+  .then(() => console.log("🟢 MongoDB Connected"))
+  .catch((err) => console.error("🔴 MongoDB Error:", err));
 
-// Start Server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port: ${PORT}`));
+// Start Server on Vercel / Render port
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => console.log(`🚀 Server is running on port ${PORT}`));
