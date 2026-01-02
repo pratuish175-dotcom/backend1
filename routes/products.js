@@ -71,6 +71,31 @@ router.get("/", async (req, res) => {
 
 
 
+// 🔍 SEARCH PRODUCTS
+router.get("/search", async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || q.trim() === "") {
+      return res.status(200).json([]);
+    }
+
+    const products = await Product.find({
+      $or: [
+        { name: { $regex: q, $options: "i" } },
+        { brand: { $regex: q, $options: "i" } },
+        { catName: { $regex: q, $options: "i" } }
+      ]
+    })
+      .limit(10)
+      .select("name price images rating");
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("❌ Search Error:", error);
+    res.status(500).json({ message: "Search failed" });
+  }
+});
 
     
 
