@@ -6,50 +6,48 @@ const router = express.Router();
 // Create/Add to cart
 router.post('/add', async (req, res) => {
   try {
+    console.log("🛒 Incoming cart body:", req.body);
+
     const { productTitle, images, rating, price, quantity, productId, userId } = req.body;
 
-    // Check if all required fields are provided
-    if (!productTitle || !images || !rating || !price || !quantity || !productId || !userId) {
-      return res.status(400).json({ message: 'Missing required fields' });
+    if (
+      !productTitle ||
+      !Array.isArray(images) || images.length === 0 ||
+      price == null ||
+      quantity == null ||
+      !productId ||
+      !userId
+    ) {
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Validate the productId and userId formats
-    if (!mongoose.Types.ObjectId.isValid(productId) || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Invalid productId or userId format' });
+    if (
+      !mongoose.Types.ObjectId.isValid(productId) ||
+      !mongoose.Types.ObjectId.isValid(userId)
+    ) {
+      return res.status(400).json({ message: "Invalid productId or userId" });
     }
 
-    // Ensure price and quantity are valid numbers
-    if (isNaN(price) || price <= 0 || isNaN(quantity) || quantity <= 0) {
-      return res.status(400).json({ message: 'Invalid price or quantity' });
-    }
-
-    // Calculate the subtotal (price * quantity)
-    const subtotal = price * quantity;
-
-    // Use ObjectId for MongoDB references
-    const productObjectId = new mongoose.Types.ObjectId(productId);
-    const userObjectId = new mongoose.Types.ObjectId(userId);
-
-    // Create a new cart item
     const cartItem = new Cart({
       productTitle,
       images,
-      rating,
+      rating: rating ?? 0,
       price,
       quantity,
-      subtotal,
-      productId: productObjectId,
-      userId: userObjectId,
+      subtotal: price * quantity,
+      productId,
+      userId
     });
 
-    // Save the cart item to the database
     const savedItem = await cartItem.save();
     res.status(201).json(savedItem);
+
   } catch (error) {
-    console.error('❌ Error saving cart item:', error);
-    res.status(500).json({ message: 'Failed to add to cart', error: error.message });
+    console.error("❌ Cart error:", error);
+    res.status(500).json({ message: "Failed to add to cart" });
   }
 });
+
 
 // Get all cart items
 router.get('/', async (req, res) => {
