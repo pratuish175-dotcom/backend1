@@ -47,12 +47,10 @@ router.post('/signin', async (req, res) => {
     if (!user)
       return res.status(400).json({ message: 'Invalid email or password' });
 
-    // Compare password with hashed one
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(400).json({ message: 'Invalid email or password' });
 
-    // Generate token
     const token = jwt.sign(
       {
         userId: user._id,
@@ -62,11 +60,12 @@ router.post('/signin', async (req, res) => {
       { expiresIn: '1d' }
     );
 
+    // ✅ IMPORTANT FIX HERE
     res.json({
       success: true,
       token,
       user: {
-        id: user.id,
+        _id: user._id.toString(),   // ⭐ MUST be _id
         name: user.name,
         email: user.email,
         phone: user.phone,
@@ -77,6 +76,7 @@ router.post('/signin', async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
+
 router.get('/', authenticateToken, async (req, res) => {
     try {
       // Retrieve the user from the database using the userId from the token
@@ -89,7 +89,7 @@ router.get('/', authenticateToken, async (req, res) => {
       res.json({
         success: true,
         user: {
-          id: user.id,
+          id: user._id,
           name: user.name,
           email: user.email,
           phone: user.phone,
@@ -128,7 +128,7 @@ router.get('/', authenticateToken, async (req, res) => {
       res.json({
         success: true,
         user: {
-          id: user.id,
+          id: user._id,
           name: user.name,
           email: user.email,
           phone: user.phone,
@@ -170,7 +170,7 @@ router.get('/', authenticateToken, async (req, res) => {
         success: true,
         message: 'User updated successfully',
         user: {
-          id: user.id,
+          id: user._id,
           name: user.name,
           phone: user.phone,
           email: user.email,
